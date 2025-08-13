@@ -1,0 +1,668 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Stop Procrastination — 1 minute qui change tout</title>
+<meta name="theme-color" content="#000">
+<style>
+  :root{
+    --text:#eef3ff; --muted:#c7d1ff; --line:#ffffff25; --good:#21d67a; --bad:#ff5c5c;
+    --bg:#000; --warn:#ff6b6b; --halo:#7aa0ff; --halo2:#8b5cf6;
+  }
+  *{box-sizing:border-box}
+  html,body{
+    height:100%;margin:0;background:var(--bg);color:var(--text);
+    font-family:Inter,system-ui,Segoe UI,Roboto,Arial;-webkit-tap-highlight-color:transparent
+  }
+
+  /* ---------- BACKGROUND ---------- */
+  .back{position:fixed;inset:0;z-index:0;overflow:hidden}
+  .bg{
+    position:absolute;inset:-2%;
+    background-size:cover;background-position:center;
+    filter:blur(12px) brightness(.55) saturate(.95);
+    transition:opacity .6s ease, transform .6s ease;
+    opacity:0;transform:scale(1.03)
+  }
+  .bg.show{opacity:1;transform:scale(1)}
+  .vignette{position:absolute;inset:0;pointer-events:none;box-shadow:inset 0 0 300px rgba(0,0,0,.72)}
+  .grain{
+    position:fixed;inset:-50%;z-index:0;pointer-events:none;opacity:.05;mix-blend-mode:soft-light;
+    background-image:url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="160" height="160"><filter id="n"><feTurbulence baseFrequency="0.9" numOctaves="3" stitchTiles="stitch"/></filter><rect width="100%" height="100%" filter="url(%23n)" opacity="0.5"/></svg>');
+  }
+
+  /* ---------- BRAND (sobre, centré en haut) ---------- */
+  .brand{
+    position:fixed;top:10px;left:50%;transform:translateX(-50%);
+    z-index:9;font-size:14px;font-weight:800;letter-spacing:.12em;
+    color:var(--text);opacity:.6;text-transform:uppercase;pointer-events:none;
+  }
+
+  /* ---------- FRAME ---------- */
+  .frame{
+    position:relative;z-index:1;display:grid;place-items:center;min-height:100%;
+    padding:clamp(12px,4vw,28px)
+  }
+
+  /* ---------- PANELS ---------- */
+  .panel{opacity:0;transform:translateY(10px);transition:opacity .35s ease, transform .35s ease}
+  .panel.show{opacity:1;transform:translateY(0)}
+  .center.panel{
+    display:none;flex-direction:column;align-items:center;justify-content:center;gap:22px;
+    max-width:min(900px,94vw);text-align:center
+  }
+  .center.panel.show{display:flex}
+
+  /* Limite largeur + ombre douce */
+  .title, .subtitle, .modal h2, .modal p, .resume h2, .resume p,
+  .cut h2, .cut p, .solo h2, .solo p, .finale h2, .finale p,
+  .after h2, .after p, .truth h2, .truth p{
+    max-width: 720px; margin-left:auto; margin-right:auto;
+    text-shadow:0 2px 12px rgba(0,0,0,.5);
+  }
+  .title{font-weight:900;font-size:clamp(22px,5.2vw,44px);line-height:1.16;margin:0;letter-spacing:.2px}
+  .subtitle{margin:0;opacity:.95;font-size:clamp(15px,3.6vw,20px);color:var(--muted)}
+
+  /* ---------- CHOIX ---------- */
+  .choices{width:100%}
+  .grid{display:grid;gap:12px;grid-template-columns:1fr}
+  /* Dès 680px : deux colonnes, même largeur que les textes, et centrées */
+  @media (min-width:680px){
+    .grid{
+      grid-template-columns:repeat(2, minmax(280px, 1fr));
+      max-width:720px;           /* même largeur que .title/.subtitle */
+      margin:0 auto;             /* centrage du bloc de choix */
+      justify-items:stretch;     /* boutons = pleine largeur de leur colonne */
+    }
+  }
+
+  .btn{
+    position:relative;display:flex;align-items:center;justify-content:center;gap:10px;
+    min-height:62px;border-radius:16px;border:1px solid var(--line);
+    background:
+      radial-gradient(120% 180% at 50% 0%, rgba(255,255,255,.12), rgba(255,255,255,.05)),
+      linear-gradient(180deg, rgba(255,255,255,.10), rgba(255,255,255,.06));
+    color:var(--text);font-weight:900;font-size:clamp(15px,3.4vw,18px);letter-spacing:.2px;
+    box-shadow:0 14px 28px rgba(0,0,0,.38), inset 0 1px 0 rgba(255,255,255,.05);
+    transition:transform .06s ease, filter .2s ease, background .2s ease;
+    width:100%; overflow:hidden;
+  }
+  .btn:active{transform:scale(.985)}
+  .btn:focus-visible{outline:3px solid #fff;outline-offset:2px}
+  .ghost{opacity:.88}
+  .danger{border-color:rgba(255,107,107,.4); background:linear-gradient(180deg, rgba(255,107,107,.16), rgba(255,107,107,.06))}
+
+  .btn::after{
+    content:""; position:absolute; top:0; left:-120%; width:120%; height:100%;
+    background:linear-gradient(90deg, transparent, rgba(255,255,255,.12), transparent);
+    transition:left .35s ease;
+  }
+  .btn:hover::after{ left:100% }
+
+  /* ---------- FLASH ---------- */
+  .flash{position:fixed;inset:0;pointer-events:none;z-index:5;opacity:0}
+  .flash.show{animation:impact .32s ease}
+  @keyframes impact{0%{opacity:.9}100%{opacity:0}}
+
+  /* ---------- OVERLAYS ---------- */
+  .modal,.resume,.cut,.solo,.finale,.after,.truth{
+    position:fixed;inset:0;display:none;z-index:7;align-items:flex-start;justify-content:center;
+    padding:clamp(16px,4vw,36px);padding-bottom:calc(8vh + env(safe-area-inset-bottom));
+    text-align:center;overflow:auto
+  }
+  .modal.show,.resume.show,.cut.show,.solo.show,.finale.show,.after.show,.truth.show{display:flex;animation:fade .25s ease both}
+  .modal > div,.resume > div,.cut > div,.solo > div,.finale > div,.after > div,.truth > div{
+    width:100%;max-width:min(880px,94vw);margin-top:clamp(6vh,10vh,14vh)
+  }
+  .modal h2,.resume h2,.cut h2,.solo h2{margin:0;font-size:clamp(24px,6vw,46px);line-height:1.15}
+  .modal p,.resume p,.cut p,.solo p{margin:.6rem 0 0;opacity:.92;font-size:clamp(14px,3.4vw,18px);color:#d9defa}
+  @keyframes fade{from{opacity:0}to{opacity:1}}
+
+  /* Halo décoratif doux */
+  .halo::before{
+    content:"";position:absolute;left:50%;transform:translateX(-50%);
+    width:min(80vw,780px);height:220px;filter:blur(90px);
+    background:radial-gradient(closest-side, rgba(122,160,255,.28), transparent);
+    top:8%;z-index:-1;
+  }
+
+  /* ---------- FINALE ---------- */
+  .claim{position:relative;display:inline-block;font-weight:900;letter-spacing:.3px;line-height:1.12;font-size:clamp(26px,6.2vw,54px);margin:0}
+  .subclaim{margin:.4rem 0 .8rem;opacity:.96;font-size:clamp(16px,3.6vw,22px);color:#e6ecff}
+  .provoc{
+    margin:.4rem 0 1rem;font-weight:900;letter-spacing:.3px;font-size:clamp(16px,3.8vw,22px);
+    color:#ffd6d6;text-shadow:0 0 12px rgba(255,107,107,.25);
+  }
+  .timerWrap{display:flex;flex-direction:column;align-items:center;gap:14px;margin-top:6px}
+  .ringWrap{position:relative;width:min(64vw,300px);aspect-ratio:1}
+  .ringWrap svg{position:absolute;inset:0;filter:drop-shadow(0 10px 24px rgba(0,0,0,.45))}
+  .tNum{position:absolute;inset:0;display:grid;place-items:center;font-weight:900;font-size:clamp(26px,12vw,48px);letter-spacing:.5px}
+  .tLabel{opacity:.9;font-size:clamp(12px,3.4vw,14px);letter-spacing:.4px}
+
+  /* ---------- AFTER ---------- */
+  .after h2{font-size:clamp(26px,6.2vw,54px);line-height:1.12;margin:0 0 .4rem;font-weight:900}
+  .after p{max-width:880px;margin:.8rem auto 0;color:#eaf0ff;opacity:.96;font-size:clamp(15px,3.4vw,20px);line-height:1.6}
+
+  /* ---------- TRUTH ---------- */
+  .truth h2{font-size:clamp(26px,6.2vw,50px);line-height:1.14;margin:0 0 .6rem;font-weight:900}
+  .truth p{max-width:880px;margin:.6rem auto 0;color:#eaf0ff;opacity:.96;font-size:clamp(15px,3.4vw,20px);line-height:1.6}
+  .quote{font-style:italic;font-size:clamp(16px,4vw,22px);opacity:.95;margin-top:10px}
+
+  /* SR + superposition */
+  #sr{position:absolute;left:-9999px;top:auto;width:1px;height:1px;overflow:hidden}
+  .overlay-open .center{opacity:0;pointer-events:none}
+
+  /* >>>>> HIGHLIGHT du prénom <<<<< */
+  .nameHi{
+    background:linear-gradient(90deg,#8bb4ff,#b59cff);
+    -webkit-background-clip:text;background-clip:text;color:transparent
+  }
+
+  /* >>>>> Micro feedback choix <<<<< */
+  @keyframes shake{10%,90%{transform:translateX(-2px)}20%,80%{transform:translateX(4px)}30%,50%,70%{transform:translateX(-6px)}40%,60%{transform:translateX(6px)}}
+  .btn.shake{animation:shake .35s ease}
+  @keyframes pulse{0%{box-shadow:0 0 0 0 rgba(33,214,122,.35)}70%{box-shadow:0 0 0 16px rgba(33,214,122,0)}100%{box-shadow:0 0 0 0 rgba(33,214,122,0)}}
+  .btn.pulse{animation:pulse .6s ease}
+
+  @media (prefers-reduced-motion: reduce){
+    *{animation-duration:.01ms !important;animation-iteration-count:1 !important;transition-duration:.01ms !important;scroll-behavior:auto !important}
+    .bg{filter:blur(0) brightness(.65) saturate(.9)}
+  }
+
+  /* ===== Desktop layout (>= 1024px) : centrage + largeur confortable ===== */
+  @media (min-width: 1024px){
+    .frame{
+      min-height:100vh;
+      padding:48px 48px 56px;
+    }
+    .center.panel{
+      max-width: 980px;
+      gap: 26px;
+      align-items: center;
+      text-align: center;
+      margin: 0 auto;
+    }
+    .title,.subtitle{ margin-left:auto; margin-right:auto }
+    .title{ line-height:1.12 }
+    .subtitle{ font-size: 18px }
+
+    /* On conserve la grille à 720px pour l'aligner avec le texte */
+    .grid{
+      max-width:720px;
+      margin:0 auto;
+      grid-template-columns:repeat(2, minmax(300px, 1fr));
+      gap:14px;
+      justify-items:stretch;
+    }
+    .grid .btn{
+      width: 100%;
+      min-height: 66px;
+      padding: 14px 18px;
+      font-size: 18px;
+    }
+
+    .modal,.resume,.cut,.solo,.finale,.after,.truth{
+      align-items: center;
+      padding-top: 0;
+      padding-bottom: 48px;
+    }
+    .modal > div,.resume > div,.cut > div,.solo > div,.finale > div,.after > div,.truth > div{
+      max-width: 980px;
+      margin-top: 0;
+    }
+
+    .timerWrap{ margin-top: 10px }
+    .brand{ top: 16px; font-size: 15px }
+  }
+</style>
+</head>
+<body>
+
+<!-- MARQUE SOBRE EN HAUT -->
+<div class="brand">lebrix</div>
+
+<!-- BACKGROUND -->
+<div class="back">
+  <div id="bg" class="bg"></div>
+  <div class="vignette"></div>
+  <div class="grain"></div>
+</div>
+
+<!-- SR live region -->
+<div id="sr" aria-live="polite" aria-atomic="true"></div>
+
+<!-- CENTER VIEW -->
+<div class="frame">
+  <div class="center panel halo" id="center" aria-hidden="true">
+    <h1 class="title" id="title">Ton réveil éventre le silence.</h1>
+    <p class="subtitle" id="subtitle">Tu le sais, %NAME% : c’est maintenant… ou c’est le même jour que d’habitude.</p>
+    <div class="choices"><div class="grid" id="choices"></div></div>
+  </div>
+</div>
+
+<!-- FLASH -->
+<div class="flash" id="flash"></div>
+
+<!-- MODALS -->
+<div class="modal panel halo" id="modal" aria-hidden="true">
+  <div>
+    <h2>On va se parler vrai.</h2>
+    <p>Ton prénom — qu’on arrête les faux-semblants.</p>
+    <div class="field">
+      <input id="who" class="inp" placeholder="Ex. Nika, Sophian…" maxlength="24" autocomplete="name" style="min-width:220px;max-width:360px;width:70vw;padding:12px 14px;border-radius:12px;border:1px solid var(--line);background:#0b0b0b;color:#fff;font-size:16px">
+      <button class="btn" id="saveWho">Entrer</button>
+    </div>
+  </div>
+</div>
+
+<div class="resume panel halo" id="resume" aria-hidden="true">
+  <div>
+    <h2 id="resumeTitle">Tu as lâché la dernière fois.</h2>
+    <p id="resumeText">On reprend proprement, %NAME% ? Ou tu veux recommencer à zéro et arrêter les alibis ?</p>
+    <div class="field" style="margin-top:18px">
+      <button class="btn" id="resumeGo">Reprendre</button>
+      <button class="btn danger" id="resumeReset">Recommencer à zéro</button>
+    </div>
+  </div>
+</div>
+
+<!-- CUT / SOLO -->
+<div class="cut panel halo" id="cut" aria-hidden="true">
+  <div>
+    <h2 id="cutTitle">Tu viens de dire non ici, %NAME%.</h2>
+    <p id="cutText">Preuve : tu peux dire non. Le reste, ce sont des histoires que tu te racontes.</p>
+    <div class="field" style="margin-top:18px"><button class="btn" id="cutBtn">Continuer</button></div>
+  </div>
+</div>
+
+<div class="solo panel halo" id="solo" aria-hidden="true">
+  <div>
+    <h2 id="soloTitle">Arrête de dire “plus tard”, %NAME%.</h2>
+    <p id="soloText">“Plus tard” est un cimetière. Les projets n’en reviennent pas.</p>
+    <div class="field" style="margin-top:14px"><button class="btn ghost" id="soloNext">Continuer</button></div>
+  </div>
+</div>
+
+<!-- FINALE -->
+<div class="finale panel halo" id="finale" aria-hidden="true">
+  <div>
+    <h2 class="claim" id="claim">On arrête de parler, %NAME%.</h2>
+    <p class="subclaim" id="subclaim">Ton max de pompes. <strong>1 minute</strong>. Zéro négociation.</p>
+    <div class="provoc" id="provocLine">…Sauf si, même ici, tu préfères abandonner.</div>
+
+    <div class="timerWrap">
+      <div class="ringWrap">
+        <svg viewBox="0 0 120 120" aria-hidden="true">
+          <defs><linearGradient id="g" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#6aa3ff"/><stop offset="100%" stop-color="#8b5cf6"/></linearGradient></defs>
+          <circle cx="60" cy="60" r="52" fill="none" stroke="rgba(255,255,255,.12)" stroke-width="10" />
+          <circle id="ring" cx="60" cy="60" r="52" fill="none" stroke="url(#g)" stroke-width="10" stroke-linecap="round" transform="rotate(-90 60 60)"/>
+        </svg>
+        <div class="tNum"><span id="tNum">01:00</span></div>
+      </div>
+      <div class="tLabel">Lance le chrono. Puis « J’ai terminé » sans blabla.</div>
+      <div class="field" style="margin-top:6px">
+        <button class="btn" id="startFocus">▶️ Lancer 1 min</button>
+        <button class="btn ghost" id="quitFocus">J’ai terminé</button>
+      </div>
+      <div style="height:10px"></div>
+      <button class="btn ghost" id="replay">🔁 Rejouer</button>
+    </div>
+  </div>
+</div>
+
+<!-- AFTER -->
+<div class="after panel halo" id="after" aria-hidden="true">
+  <div>
+    <h2 id="afterTitle">Regarde bien, %NAME%.</h2>
+    <p id="afterText">
+      Tu n’as pas eu besoin d’inspiration. Tu as eu besoin d’un geste. Tu l’as fait.
+      <br><br>
+      Cette minute t’a prouvé quelque chose : <strong>tu n’es pas ton hésitation</strong>. Tu es ce que tu fais quand tu décides.
+      <br><br>
+      Applique cette brutalité partout : un mail envoyé, un appel passé, dix pages lues, cinq lignes écrites, trois étirements. <strong>Agis avant de penser long</strong>. Pense court, fais long.
+    </p>
+    <div class="field" style="margin-top:18px">
+      <button class="btn danger" id="toTruth">🧹 Supprimer mon historique d’excuses</button>
+    </div>
+  </div>
+</div>
+
+<!-- TRUTH -->
+<div class="truth panel halo" id="truth" aria-hidden="true">
+  <div>
+    <h2>Ouvre les yeux, %NAME%.</h2>
+    <p>
+      Le but de cette expérience est simple&nbsp;: te montrer à quel point tu sais reconnaître les bons choix…
+      mais que tu les <em>diffères</em> dans la vraie vie. Ici, tu as prouvé que tu pouvais agir sans négocier.
+      Fais pareil dehors.
+    </p>
+    <p class="quote">
+      «&nbsp;Tu veux rendre tes proches fiers… alors que toi-même, tu n’es pas encore fier de toi.&nbsp;»
+    </p>
+    <p id="statsLine" style="margin-top:6px;opacity:.85"></p>
+    <p style="margin-top:14px;opacity:.6;font-size:14px;font-weight:800;letter-spacing:.1em;text-transform:uppercase">
+      — lebrix
+    </p>
+    <div class="field" style="margin-top:22px">
+      <button class="btn" id="playAgain">Rejouer</button>
+    </div>
+  </div>
+</div>
+
+<script>
+/* ------- IMAGES ------- */
+const IMGS = {
+  wake:"https://images.unsplash.com/photo-1517841905240-472988babdf9?q=80&w=1920&auto=format&fit=crop",
+  commute:"https://images.unsplash.com/photo-1460472178825-e5240623afd5?q=80&w=1920&auto=format&fit=crop",
+  office:"https://images.unsplash.com/photo-1522206024047-9c9254216753?q=80&w=1920&auto=format&fit=crop",
+  afternoon:"https://images.unsplash.com/photo-1515165562835-c4c5b18bdf57?q=80&w=1920&auto=format&fit=crop",
+  evening:"https://images.unsplash.com/photo-1508264165352-258a6b9589d0?q=80&w=1920&auto=format&fit=crop",
+  night:"https://images.unsplash.com/photo-1506748686214-e9df14d4d9d0?q=80&w=1920&auto=format&fit=crop",
+  cut1:"https://images.unsplash.com/photo-1525182008055-f88b95ff7980?q=80&w=1920&auto=format&fit=crop",
+  cut2:"https://images.unsplash.com/photo-1483721310020-03333e577078?q=80&w=1920&auto=format&fit=crop",
+  solo:"https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?q=80&w=1920&auto=format&fit=crop",
+  finale:"https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?q=80&w=1920&auto=format&fit=crop",
+  after:"https://images.unsplash.com/photo-1503023345310-bd7c1de61c7d?q=80&w=1920&auto=format&fit=crop"
+};
+Object.values(IMGS).forEach(src=>{const im=new Image(); im.src=src;});
+
+/* ------- UTIL ------- */
+const $ = sel => document.querySelector(sel);
+function ucfirst(s){return s ? s.charAt(0).toUpperCase()+s.slice(1).toLowerCase() : s}
+function personalize(txt){
+  const nm = state.name || 'toi';
+  return String(txt||'').replaceAll('%NAME%', `<span class="nameHi">${nm}</span>`);
+}
+function nowPhrase(){
+  const d=new Date(), h=d.getHours();
+  if(h>=23||h<=5)  return "Il est "+String(h).padStart(2,'0')+"h. Et t’es encore là, %NAME%, à chercher un prétexte ?";
+  if(h>=6 && h<=9)  return "Matin clair. C’est ici que ça se gagne, %NAME%.";
+  if(h>=10&& h<=16) return "Milieu de journée. Soit tu avances, soit tu t’endors debout, %NAME%.";
+  if(h>=17&& h<=22) return "Soir chargé. Ta fatigue parle fort. Ta fierté parle plus fort, %NAME%.";
+  return "C’est maintenant, %NAME%.";
+}
+
+/* ------- STATE ------- */
+const state = {
+  i:0, name:'', outcome:'', // outcome: success | incomplete
+  focusTimer:null, remaining:60, circumference:0,
+  startedAt: Date.now()
+};
+
+/* ------- SCENES ------- */
+const SCENES = [
+  { bg:IMGS.wake, t:"Ton réveil éventre le silence.", s: () => nowPhrase(),
+    opts:[ {txt:"Me lever comme quelqu’un qui tient parole", good:true},
+           {txt:"Rester au lit et recommencer le mensonge", bad:true} ] },
+
+  { bg:IMGS.commute, t:"Trajet figé.", s:"Le temps passe de toute façon, %NAME%. À toi de décider s’il passe <em>pour</em> toi.",
+    opts:[ {txt:"Capturer 3 idées pour mon futur", good:true},
+           {txt:"Scroller pour oublier qui je veux être", bad:true} ] },
+
+  { solo:true, bg:IMGS.solo, title:"Arrête de dire “plus tard”, %NAME%.", text:"“Plus tard” est un cimetière. Les projets n’en reviennent pas." },
+
+  { bg:IMGS.office, t:"Bureau clignotant.", s:"Les mails crient. Tes priorités murmurent — écoute‑les, %NAME%.",
+    opts:[ {txt:"Écrire 3 priorités et agir", good:true},
+           {txt:"YouTube ‘5 min’ (tu connais la fin)", bad:true} ] },
+
+  { cut:true, bg:IMGS.cut1, title:"Tu viens de dire non ici, %NAME%.", text:"Preuve : tu peux dire non. Le reste, ce sont des histoires que tu te racontes." },
+
+  { bg:IMGS.afternoon, t:"Après-midi, la tâche te fixe.", s:"C’est elle ou ton estime, %NAME%. Les deux n’attendent pas.",
+    opts:[ {txt:"Lancer 5 minutes — pas plus, pas moins", good:true},
+           {txt:"Produire une excuse élégante (et creuse)", bad:true} ] },
+
+  { cut:true, bg:IMGS.cut2, title:"Tu sais exactement quoi faire, %NAME%.", text:"Ce qui manque n’est pas une méthode — c’est d’arrêter de négocier." },
+
+  { bg:IMGS.evening, t:"Soirée bleue.", s:"Ton lit t’appelle, %NAME%. Ta fatigue aussi. Ta fierté réclame 10 minutes.",
+    opts:[ {txt:"Lire 10 minutes sans écran", good:true},
+           {txt:"Regarder des séries toute la soirée — et perdre demain", bad:true} ] },
+
+  { solo:true, bg:IMGS.solo, title:"Chaque fois que tu repousses…", text:"…quelqu’un d’autre prend ta place. %NAME%, tu laisses faire ?" },
+
+  { bg:IMGS.night, t:"Nuit immobile.", s:"Toi. L’écran. La note arrive au matin, %NAME%.",
+    opts:[ {txt:"Mode avion + 6 respirations lentes", good:true},
+           {txt:"Encore un épisode — encore un regret", bad:true} ] },
+
+  { end:true, bg:IMGS.finale }
+];
+
+/* ------- DOM ------- */
+const bg   = $('#bg');
+const centerView = $('#center');
+const ttl  = $('#title');
+const sub  = $('#subtitle');
+const list = $('#choices');
+const flash= $('#flash');
+
+const modal= $('#modal');
+const whoInp = $('#who');
+const saveWho= $('#saveWho');
+
+const resume = $('#resume');
+const resumeGo    = $('#resumeGo');
+const resumeReset = $('#resumeReset');
+
+const cut  = $('#cut');
+const cutTitle = $('#cutTitle');
+const cutText  = $('#cutText');
+const cutBtn   = $('#cutBtn');
+
+const solo = $('#solo');
+const soloTitle = $('#soloTitle');
+const soloText  = $('#soloText');
+const soloNext  = $('#soloNext');
+
+const finale = $('#finale');
+const startFocus = $('#startFocus');
+const quitFocus  = $('#quitFocus');
+const replay     = $('#replay');
+const ringEl     = $('#ring');
+const tNum       = $('#tNum');
+
+const after      = $('#after');
+const toTruth    = $('#toTruth');
+
+const truth      = $('#truth');
+const playAgain  = $('#playAgain');
+
+/* ------- Screen manager ------- */
+const screens = { center: centerView, modal, resume, cut, solo, finale, after, truth };
+function showScreen(key){
+  Object.values(screens).forEach(el=>{
+    el.classList.remove('show');
+    el.setAttribute('aria-hidden','true');
+  });
+  document.documentElement.classList.toggle('overlay-open', !(key==='center'||key==='modal'));
+  const el = screens[key];
+  if(el){ el.classList.add('show'); el.setAttribute('aria-hidden','false'); }
+}
+
+/* ------- Helpers ------- */
+let lock=false;
+function clickOnce(fn){ return ()=>{ if(lock) return; lock=true; try{ fn(); } finally{ setTimeout(()=>lock=false,280); } }; }
+function shuffle(a){ const b=[...a]; for(let j=b.length-1;j>0;j--){ const k=Math.floor(Math.random()*(j+1)); [b[j],b[k]]=[b[k],b[j]]; } return b; }
+function setBG(url){
+  if(!url) return;
+  bg.classList.remove('show');
+  const tmp=new Image();
+  tmp.onload=()=>{ bg.style.backgroundImage=`url('${url}')`; requestAnimationFrame(()=>bg.classList.add('show')); };
+  tmp.src=url;
+}
+function impact(kind){
+  flash.style.background = kind==='good' ? 'rgba(33,214,122,.45)' : 'rgba(255,92,92,.55)';
+  flash.classList.add('show'); setTimeout(()=>flash.classList.remove('show'),320);
+  if(navigator.vibrate) navigator.vibrate(kind==='good'?12:50);
+}
+
+/* ------- Views ------- */
+function centerChoices(opts){
+  list.innerHTML='';
+  const grid=document.createElement('div'); grid.className='grid';
+  shuffle(opts).forEach(o=>{
+    const b=document.createElement('button');
+    b.className='btn '+(o.bad?'bad':'good');
+    b.textContent=o.txt;
+    b.onclick=clickOnce(()=>{
+      if(o.bad){ b.classList.add('shake'); setTimeout(()=>b.classList.remove('shake'),360); impact('bad'); }
+      else { b.classList.add('pulse'); setTimeout(()=>b.classList.remove('pulse'),620); impact('good'); }
+      state.i++; render();
+    });
+    grid.appendChild(b);
+  });
+  list.appendChild(grid);
+  const first=list.querySelector('.btn'); if(first) first.focus();
+}
+function showCut(sc){
+  setBG(sc.bg);
+  document.getElementById('cutTitle').innerHTML=personalize(sc.title);
+  document.getElementById('cutText').innerHTML =personalize(sc.text);
+  showScreen('cut');
+  document.getElementById('cutBtn').onclick=clickOnce(()=>{ state.i++; render(); });
+}
+function showSolo(sc){
+  setBG(sc.bg);
+  document.getElementById('soloTitle').innerHTML=personalize(sc.title);
+  document.getElementById('soloText').innerHTML =personalize(sc.text);
+  showScreen('solo');
+  document.getElementById('soloNext').onclick=clickOnce(()=>{ state.i++; render(); });
+}
+
+/* ------- Chrono 1 min ------- */
+function setupRing(){
+  const r=parseFloat(document.getElementById('ring').getAttribute('r'))||52;
+  state.circumference=2*Math.PI*r;
+  document.getElementById('ring').setAttribute('stroke-dasharray', String(state.circumference));
+  document.getElementById('ring').setAttribute('stroke-dashoffset','0');
+}
+function setProgress(p){ document.getElementById('ring').setAttribute('stroke-dashoffset', String(state.circumference*p)); }
+function formatTime(s){ const m=Math.floor(s/60), r=s%60; return `${String(m).padStart(2,'0')}:${String(r).padStart(2,'0')}`; }
+function resetFocus(){ state.remaining=60; document.getElementById('tNum').textContent=formatTime(state.remaining); setProgress(0); }
+function startCountdown(){
+  if(state.focusTimer) return;
+  state.outcome='incomplete';
+  localStorage.setItem('last_session_outcome', state.outcome);
+  state.focusTimer=setInterval(()=>{
+    state.remaining=Math.max(0,state.remaining-1);
+    document.getElementById('tNum').textContent=formatTime(state.remaining);
+    setProgress((60-state.remaining)/60);
+    if(state.remaining<=0){ stopCountdown(); showAfter(true); }
+  },1000);
+}
+function stopCountdown(){ if(state.focusTimer){ clearInterval(state.focusTimer); state.focusTimer=null; } }
+
+/* ------- Final & After & Truth ------- */
+function showFinal(){
+  setBG(IMGS.finale);
+  document.getElementById('claim').innerHTML=personalize("On arrête de parler, %NAME%.");
+  document.getElementById('subclaim').innerHTML="Ton max de pompes. <strong>1 minute</strong>. Zéro négociation.";
+  document.getElementById('provocLine').textContent="…Sauf si, même ici, tu préfères abandonner.";
+  setupRing(); resetFocus();
+  showScreen('finale');
+  document.getElementById('startFocus').onclick=clickOnce(startCountdown);
+  document.getElementById('quitFocus').onclick =clickOnce(()=>{ stopCountdown(); showAfter(true); });
+  document.getElementById('replay').onclick    =clickOnce(()=>{ stopCountdown(); state.i=0; render(); });
+}
+function showAfter(markSuccess){
+  setBG(IMGS.after);
+  document.getElementById('afterTitle').innerHTML=personalize("Regarde bien, %NAME%.");
+  showScreen('after');
+  if(markSuccess){
+    state.outcome='success';
+    localStorage.setItem('last_session_outcome','success');
+    const streak = parseInt(localStorage.getItem('streak_success')||'0',10)+1;
+    localStorage.setItem('streak_success', String(streak));
+  }
+}
+function showTruth(){
+  try{ localStorage.removeItem('last_session_outcome'); }catch{}
+  setBG(IMGS.after);
+  document.querySelector('#truth h2').innerHTML = personalize("Ouvre les yeux, %NAME%.");
+
+  /* Stats fin : temps passé + streak */
+  const ms = Date.now()-state.startedAt;
+  const sec = Math.max(1,Math.round(ms/1000));
+  const m = Math.floor(sec/60), s = sec%60;
+  const spent = `${m} min ${String(s).padStart(2,'0')} s`;
+  const streak = parseInt(localStorage.getItem('streak_success')||'0',10);
+  const stats = [];
+  stats.push(`Tu viens de passer <strong>${spent}</strong> ici.`);
+  if(streak>0) stats.push(`Finales bouclées : <strong>${streak}</strong>.`);
+  document.getElementById('statsLine').innerHTML = stats.join(' ');
+
+  showScreen('truth');
+}
+
+/* ------- Render loop ------- */
+function render(){
+  Object.values(screens).forEach(el=>el.classList.remove('show'));
+  document.documentElement.classList.remove('overlay-open');
+
+  if(state.i<0) state.i=0;
+  if(state.i>=SCENES.length) state.i=SCENES.length-1;
+
+  const sc=SCENES[state.i];
+  if(!sc) return;
+
+  if(sc.end){ showFinal(); return; }
+  if(sc.cut){ showCut(sc); return; }
+  if(sc.solo){ showSolo(sc); return; }
+
+  setBG(sc.bg);
+  document.getElementById('title').textContent=sc.t;
+  const sText = typeof sc.s === 'function' ? sc.s() : sc.s;
+  document.getElementById('subtitle').innerHTML=personalize(sText);
+  centerChoices(sc.opts);
+  showScreen('center');
+}
+
+/* ------- INIT ------- */
+(function init(){
+  setBG(IMGS.wake);
+  const savedName = localStorage.getItem('player_name');
+  const lastOutcome = localStorage.getItem('last_session_outcome') || '';
+  state.name = savedName ? savedName : '';
+
+  if(!state.name){
+    showScreen('modal');
+  }else{
+    if(lastOutcome && lastOutcome !== 'success'){
+      document.getElementById('resumeText').innerHTML = personalize("On reprend proprement, %NAME% ? Ou tu recommences à zéro et tu arrêtes les alibis ?");
+      showScreen('resume');
+    }else{
+      document.getElementById('subtitle').innerHTML = personalize(SCENES[0].s());
+      render();
+    }
+  }
+})();
+
+/* ------- Events ------- */
+document.getElementById('saveWho').onclick=clickOnce(setName);
+document.getElementById('who').addEventListener('keydown',(e)=>{ if(e.key==='Enter') setName(); });
+function setName(){
+  const raw=(document.getElementById('who').value||'').trim();
+  state.name = ucfirst(raw) || 'toi';
+  localStorage.setItem('player_name', state.name);
+  document.getElementById('subtitle').innerHTML = personalize(SCENES[0].s());
+  render();
+}
+document.getElementById('resumeGo').onclick   = clickOnce(()=>{ render(); });
+document.getElementById('resumeReset').onclick= clickOnce(()=>{
+  localStorage.removeItem('last_session_outcome');
+  state.i=0; render();
+});
+document.getElementById('toTruth').onclick    = clickOnce(()=>{ showTruth(); });
+document.getElementById('playAgain').onclick  = clickOnce(()=>{
+  state.i=0; showScreen('center'); state.startedAt = Date.now(); render();
+});
+
+/* ------- Before unload ------- */
+window.addEventListener('beforeunload', ()=>{
+  const outcome = localStorage.getItem('last_session_outcome');
+  if(!outcome || outcome === 'incomplete'){
+    localStorage.setItem('last_session_outcome','incomplete');
+  }
+});
+</script>
+</body>
+</html>
