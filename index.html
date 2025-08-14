@@ -67,13 +67,12 @@
   /* ---------- CHOIX ---------- */
   .choices{width:100%}
   .grid{display:grid;gap:12px;grid-template-columns:1fr}
-  /* Dès 680px : deux colonnes, même largeur que les textes, et centrées */
   @media (min-width:680px){
     .grid{
       grid-template-columns:repeat(2, minmax(280px, 1fr));
-      max-width:720px;           /* même largeur que .title/.subtitle */
-      margin:0 auto;             /* centrage du bloc de choix */
-      justify-items:stretch;     /* boutons = pleine largeur de leur colonne */
+      max-width:720px;
+      margin:0 auto;
+      justify-items:stretch;
     }
   }
 
@@ -172,22 +171,12 @@
 
   /* ===== Desktop layout (>= 1024px) : centrage + largeur confortable ===== */
   @media (min-width: 1024px){
-    .frame{
-      min-height:100vh;
-      padding:48px 48px 56px;
-    }
-    .center.panel{
-      max-width: 980px;
-      gap: 26px;
-      align-items: center;
-      text-align: center;
-      margin: 0 auto;
-    }
+    .frame{ min-height:100vh; padding:48px 48px 56px }
+    .center.panel{ max-width: 980px; gap: 26px; align-items:center; text-align:center; margin:0 auto }
     .title,.subtitle{ margin-left:auto; margin-right:auto }
     .title{ line-height:1.12 }
     .subtitle{ font-size: 18px }
 
-    /* On conserve la grille à 720px pour l'aligner avec le texte */
     .grid{
       max-width:720px;
       margin:0 auto;
@@ -195,25 +184,13 @@
       gap:14px;
       justify-items:stretch;
     }
-    .grid .btn{
-      width: 100%;
-      min-height: 66px;
-      padding: 14px 18px;
-      font-size: 18px;
-    }
+    .grid .btn{ width:100%; min-height:66px; padding:14px 18px; font-size:18px }
 
-    .modal,.resume,.cut,.solo,.finale,.after,.truth{
-      align-items: center;
-      padding-top: 0;
-      padding-bottom: 48px;
-    }
-    .modal > div,.resume > div,.cut > div,.solo > div,.finale > div,.after > div,.truth > div{
-      max-width: 980px;
-      margin-top: 0;
-    }
+    .modal,.resume,.cut,.solo,.finale,.after,.truth{ align-items:center; padding-top:0; padding-bottom:48px }
+    .modal > div,.resume > div,.cut > div,.solo > div,.finale > div,.after > div,.truth > div{ max-width:980px; margin-top:0 }
 
-    .timerWrap{ margin-top: 10px }
-    .brand{ top: 16px; font-size: 15px }
+    .timerWrap{ margin-top:10px }
+    .brand{ top:16px; font-size:15px }
   }
 </style>
 </head>
@@ -235,8 +212,8 @@
 <!-- CENTER VIEW -->
 <div class="frame">
   <div class="center panel halo" id="center" aria-hidden="true">
-    <h1 class="title" id="title">Ton réveil éventre le silence.</h1>
-    <p class="subtitle" id="subtitle">Tu le sais, %NAME% : c’est maintenant… ou c’est le même jour que d’habitude.</p>
+    <h1 class="title" id="title">Ton réveil sonne.</h1>
+    <p class="subtitle" id="subtitle">Tu veux rester 5 minutes de plus, %NAME%, mais tu sais que c’est un piège.</p>
     <div class="choices"><div class="grid" id="choices"></div></div>
   </div>
 </div>
@@ -247,8 +224,8 @@
 <!-- MODALS -->
 <div class="modal panel halo" id="modal" aria-hidden="true">
   <div>
-    <h2>On va se parler vrai.</h2>
-    <p>Ton prénom — qu’on arrête les faux-semblants.</p>
+    <h2>On va être direct.</h2>
+    <p>Ton prénom — pour qu’on parle vrai.</p>
     <div class="field">
       <input id="who" class="inp" placeholder="Ex. Nika, Sophian…" maxlength="24" autocomplete="name" style="min-width:220px;max-width:360px;width:70vw;padding:12px 14px;border-radius:12px;border:1px solid var(--line);background:#0b0b0b;color:#fff;font-size:16px">
       <button class="btn" id="saveWho">Entrer</button>
@@ -258,8 +235,8 @@
 
 <div class="resume panel halo" id="resume" aria-hidden="true">
   <div>
-    <h2 id="resumeTitle">Tu as lâché la dernière fois.</h2>
-    <p id="resumeText">On reprend proprement, %NAME% ? Ou tu veux recommencer à zéro et arrêter les alibis ?</p>
+    <h2 id="resumeTitle">Tu as arrêté la dernière fois.</h2>
+    <p id="resumeText">On reprend où tu t’es arrêté, %NAME% ? Ou on recommence à zéro ?</p>
     <div class="field" style="margin-top:18px">
       <button class="btn" id="resumeGo">Reprendre</button>
       <button class="btn danger" id="resumeReset">Recommencer à zéro</button>
@@ -271,7 +248,7 @@
 <div class="cut panel halo" id="cut" aria-hidden="true">
   <div>
     <h2 id="cutTitle">Tu viens de dire non ici, %NAME%.</h2>
-    <p id="cutText">Preuve : tu peux dire non. Le reste, ce sont des histoires que tu te racontes.</p>
+    <p id="cutText">La preuve : tu peux dire non. Le reste, c’est des excuses.</p>
     <div class="field" style="margin-top:18px"><button class="btn" id="cutBtn">Continuer</button></div>
   </div>
 </div>
@@ -279,7 +256,7 @@
 <div class="solo panel halo" id="solo" aria-hidden="true">
   <div>
     <h2 id="soloTitle">Arrête de dire “plus tard”, %NAME%.</h2>
-    <p id="soloText">“Plus tard” est un cimetière. Les projets n’en reviennent pas.</p>
+    <p id="soloText">“Plus tard” = jamais. Les projets n’y reviennent pas.</p>
     <div class="field" style="margin-top:14px"><button class="btn ghost" id="soloNext">Continuer</button></div>
   </div>
 </div>
@@ -289,7 +266,7 @@
   <div>
     <h2 class="claim" id="claim">On arrête de parler, %NAME%.</h2>
     <p class="subclaim" id="subclaim">Ton max de pompes. <strong>1 minute</strong>. Zéro négociation.</p>
-    <div class="provoc" id="provocLine">…Sauf si, même ici, tu préfères abandonner.</div>
+    <div class="provoc" id="provocLine">…Sauf si tu préfères abandonner, même ici.</div>
 
     <div class="timerWrap">
       <div class="ringWrap">
@@ -300,7 +277,7 @@
         </svg>
         <div class="tNum"><span id="tNum">01:00</span></div>
       </div>
-      <div class="tLabel">Lance le chrono. Puis « J’ai terminé » sans blabla.</div>
+      <div class="tLabel">Lance le chrono. Puis clique « J’ai terminé ».</div>
       <div class="field" style="margin-top:6px">
         <button class="btn" id="startFocus">▶️ Lancer 1 min</button>
         <button class="btn ghost" id="quitFocus">J’ai terminé</button>
@@ -316,11 +293,11 @@
   <div>
     <h2 id="afterTitle">Regarde bien, %NAME%.</h2>
     <p id="afterText">
-      Tu n’as pas eu besoin d’inspiration. Tu as eu besoin d’un geste. Tu l’as fait.
+      Tu n’as pas eu besoin d’inspiration. Tu as juste agi. <strong>Bien joué.</strong>
       <br><br>
-      Cette minute t’a prouvé quelque chose : <strong>tu n’es pas ton hésitation</strong>. Tu es ce que tu fais quand tu décides.
+      Cette minute te montre une chose : <strong>tu n’es pas ton hésitation</strong>. Tu es tes actions.
       <br><br>
-      Applique cette brutalité partout : un mail envoyé, un appel passé, dix pages lues, cinq lignes écrites, trois étirements. <strong>Agis avant de penser long</strong>. Pense court, fais long.
+      Applique ça partout : un mail envoyé, un appel, dix pages lues, cinq lignes écrites, trois étirements. <strong>Agis d’abord</strong>. Pense après.
     </p>
     <div class="field" style="margin-top:18px">
       <button class="btn danger" id="toTruth">🧹 Supprimer mon historique d’excuses</button>
@@ -333,9 +310,8 @@
   <div>
     <h2>Ouvre les yeux, %NAME%.</h2>
     <p>
-      Le but de cette expérience est simple&nbsp;: te montrer à quel point tu sais reconnaître les bons choix…
-      mais que tu les <em>diffères</em> dans la vraie vie. Ici, tu as prouvé que tu pouvais agir sans négocier.
-      Fais pareil dehors.
+      Le but est simple&nbsp;: te montrer que tu connais les bons choix, mais que tu les repousses.
+      Ici, tu as agi sans négocier. <strong>Fais pareil dehors.</strong>
     </p>
     <p class="quote">
       «&nbsp;Tu veux rendre tes proches fiers… alors que toi-même, tu n’es pas encore fier de toi.&nbsp;»
@@ -374,12 +350,13 @@ function personalize(txt){
   const nm = state.name || 'toi';
   return String(txt||'').replaceAll('%NAME%', `<span class="nameHi">${nm}</span>`);
 }
+/* Phrases d’ambiance simplifiées selon l’heure */
 function nowPhrase(){
   const d=new Date(), h=d.getHours();
-  if(h>=23||h<=5)  return "Il est "+String(h).padStart(2,'0')+"h. Et t’es encore là, %NAME%, à chercher un prétexte ?";
-  if(h>=6 && h<=9)  return "Matin clair. C’est ici que ça se gagne, %NAME%.";
-  if(h>=10&& h<=16) return "Milieu de journée. Soit tu avances, soit tu t’endors debout, %NAME%.";
-  if(h>=17&& h<=22) return "Soir chargé. Ta fatigue parle fort. Ta fierté parle plus fort, %NAME%.";
+  if(h>=23||h<=5)  return "Il est "+String(h).padStart(2,'0')+"h. Tu es encore là, %NAME%. Une excuse de plus ?";
+  if(h>=6 && h<=9)  return "C’est le matin. C’est maintenant que ça se gagne, %NAME%.";
+  if(h>=10&& h<=16) return "Milieu de journée. Tu avances ou tu t’endors debout, %NAME% ?";
+  if(h>=17&& h<=22) return "Le soir. Tu es fatigué, %NAME%, mais tu peux encore choisir.";
   return "C’est maintenant, %NAME%.";
 }
 
@@ -390,39 +367,39 @@ const state = {
   startedAt: Date.now()
 };
 
-/* ------- SCENES ------- */
+/* ------- SCENES (textes simplifiés) ------- */
 const SCENES = [
-  { bg:IMGS.wake, t:"Ton réveil éventre le silence.", s: () => nowPhrase(),
-    opts:[ {txt:"Me lever comme quelqu’un qui tient parole", good:true},
-           {txt:"Rester au lit et recommencer le mensonge", bad:true} ] },
+  { bg:IMGS.wake, t:"Ton réveil sonne.", s: () => nowPhrase(),
+    opts:[ {txt:"Me lever maintenant", good:true},
+           {txt:"Rester au lit 5 minutes (tu sais comment ça finit)", bad:true} ] },
 
-  { bg:IMGS.commute, t:"Trajet figé.", s:"Le temps passe de toute façon, %NAME%. À toi de décider s’il passe <em>pour</em> toi.",
-    opts:[ {txt:"Capturer 3 idées pour mon futur", good:true},
-           {txt:"Scroller pour oublier qui je veux être", bad:true} ] },
+  { bg:IMGS.commute, t:"Trajet.", s:"Le temps passe de toute façon, %NAME%. Utilise‑le au lieu de le subir.",
+    opts:[ {txt:"Noter 3 idées utiles", good:true},
+           {txt:"Scroller pour oublier mes objectifs", bad:true} ] },
 
-  { solo:true, bg:IMGS.solo, title:"Arrête de dire “plus tard”, %NAME%.", text:"“Plus tard” est un cimetière. Les projets n’en reviennent pas." },
+  { solo:true, bg:IMGS.solo, title:"Arrête de dire “plus tard”, %NAME%.", text:"“Plus tard” = jamais. Les projets n’y reviennent pas." },
 
-  { bg:IMGS.office, t:"Bureau clignotant.", s:"Les mails crient. Tes priorités murmurent — écoute‑les, %NAME%.",
+  { bg:IMGS.office, t:"Au bureau.", s:"Les mails crient. Tes priorités sont là — écoute‑les, %NAME%.",
     opts:[ {txt:"Écrire 3 priorités et agir", good:true},
-           {txt:"YouTube ‘5 min’ (tu connais la fin)", bad:true} ] },
+           {txt:"YouTube “5 min” (tu sais comment ça finit)", bad:true} ] },
 
-  { cut:true, bg:IMGS.cut1, title:"Tu viens de dire non ici, %NAME%.", text:"Preuve : tu peux dire non. Le reste, ce sont des histoires que tu te racontes." },
+  { cut:true, bg:IMGS.cut1, title:"Tu viens de dire non ici, %NAME%.", text:"La preuve : tu peux dire non. Le reste, c’est des excuses." },
 
-  { bg:IMGS.afternoon, t:"Après-midi, la tâche te fixe.", s:"C’est elle ou ton estime, %NAME%. Les deux n’attendent pas.",
-    opts:[ {txt:"Lancer 5 minutes — pas plus, pas moins", good:true},
-           {txt:"Produire une excuse élégante (et creuse)", bad:true} ] },
+  { bg:IMGS.afternoon, t:"L’après‑midi.", s:"La tâche que tu repousses te regarde. Choisis maintenant, %NAME%.",
+    opts:[ {txt:"Faire 5 minutes. Pas plus, pas moins", good:true},
+           {txt:"Chercher une excuse (vide)", bad:true} ] },
 
-  { cut:true, bg:IMGS.cut2, title:"Tu sais exactement quoi faire, %NAME%.", text:"Ce qui manque n’est pas une méthode — c’est d’arrêter de négocier." },
+  { cut:true, bg:IMGS.cut2, title:"Tu sais déjà quoi faire, %NAME%.", text:"Il ne manque pas une méthode. Il faut juste arrêter de négocier." },
 
-  { bg:IMGS.evening, t:"Soirée bleue.", s:"Ton lit t’appelle, %NAME%. Ta fatigue aussi. Ta fierté réclame 10 minutes.",
+  { bg:IMGS.evening, t:"Le soir.", s:"Ton lit t’appelle, %NAME%. Lis 10 minutes et sois fier.",
     opts:[ {txt:"Lire 10 minutes sans écran", good:true},
            {txt:"Regarder des séries toute la soirée — et perdre demain", bad:true} ] },
 
-  { solo:true, bg:IMGS.solo, title:"Chaque fois que tu repousses…", text:"…quelqu’un d’autre prend ta place. %NAME%, tu laisses faire ?" },
+  { solo:true, bg:IMGS.solo, title:"Chaque fois que tu repousses…", text:"…quelqu’un d’autre prend ta place. %NAME%, tu la laisses ?" },
 
-  { bg:IMGS.night, t:"Nuit immobile.", s:"Toi. L’écran. La note arrive au matin, %NAME%.",
+  { bg:IMGS.night, t:"Nuit immobile.", s:"Toi et l’écran. Tu le paies demain, %NAME%.",
     opts:[ {txt:"Mode avion + 6 respirations lentes", good:true},
-           {txt:"Encore un épisode — encore un regret", bad:true} ] },
+           {txt:"Encore un épisode → encore un regret", bad:true} ] },
 
   { end:true, bg:IMGS.finale }
 ];
@@ -556,7 +533,7 @@ function showFinal(){
   setBG(IMGS.finale);
   document.getElementById('claim').innerHTML=personalize("On arrête de parler, %NAME%.");
   document.getElementById('subclaim').innerHTML="Ton max de pompes. <strong>1 minute</strong>. Zéro négociation.";
-  document.getElementById('provocLine').textContent="…Sauf si, même ici, tu préfères abandonner.";
+  document.getElementById('provocLine').textContent="…Sauf si tu préfères abandonner, même ici.";
   setupRing(); resetFocus();
   showScreen('finale');
   document.getElementById('startFocus').onclick=clickOnce(startCountdown);
@@ -627,7 +604,7 @@ function render(){
     showScreen('modal');
   }else{
     if(lastOutcome && lastOutcome !== 'success'){
-      document.getElementById('resumeText').innerHTML = personalize("On reprend proprement, %NAME% ? Ou tu recommences à zéro et tu arrêtes les alibis ?");
+      document.getElementById('resumeText').innerHTML = personalize("On reprend où tu t’es arrêté, %NAME% ? Ou on recommence à zéro ?");
       showScreen('resume');
     }else{
       document.getElementById('subtitle').innerHTML = personalize(SCENES[0].s());
